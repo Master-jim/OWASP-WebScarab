@@ -620,12 +620,14 @@ public class Message {
         return Arrays.equals(myContent, thatContent);
     }
     
+    /** Sets the ConversationID of a Message. It should be only used by the FrameworkModel when adding a new conversation.
+     * @param id Id of the conversation.
+     */
     public void setConversationID (ConversationID id) {
-    	if (id != null) {
+    	if (null != id) {
     		conversationID = id;
     	}
     }
-
 
     /** Returns the conversation id of a Response object.
      * @return null if the Response does not have a Conversation associated, else the corresponding ConversationID object.

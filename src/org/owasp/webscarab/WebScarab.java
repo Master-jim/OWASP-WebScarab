@@ -222,11 +222,9 @@ public class WebScarab {
         framework.addPlugin(xsscrlf);
         uif.addPlugin(new XSSCRLFPanel(xsscrlf));
     
-        // 2011-01-21 - JLS - Adding Support of XSSCRLFng only - BEGIN
         XSSCRLFng xsscrlfng = new XSSCRLFng(framework);
         framework.addPlugin(xsscrlfng);
         uif.addPlugin(new XSSCRLFngPanel(xsscrlfng));
-        // 2011-01-21 - JLS - Adding Support of XSSCRLFng only - END
         
         SessionIDAnalysis sessionIDAnalysis = new SessionIDAnalysis(framework);
         framework.addPlugin(sessionIDAnalysis);
