@@ -96,18 +96,18 @@ public class FrameworkModel {
                 try {
                     _store = new FileSystemStore((File) store);
                 } catch (Exception e) {
+                	_rwl.writeLock().release();
                     throw new StoreException("Error initialising session : " + e.getMessage());
                 }
             } else {
                 _rwl.writeLock().release();
                 throw new StoreException("Unknown store type " + type + " and store " + store);
             }
-            _rwl.readLock().acquire(); // downgrade
             _rwl.writeLock().release();
             _urlModel.fireUrlsChanged();
             _conversationModel.fireConversationsChanged();
             fireCookiesChanged();
-            _rwl.readLock().release();
+            //_rwl.readLock().release();
         } catch (InterruptedException ie) {
             _logger.severe("Interrupted! " + ie);
         }
