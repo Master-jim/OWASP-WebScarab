@@ -174,6 +174,12 @@ public class FrameworkModel {
      * @param origin the plugin that created this conversation
      */
     public void addConversation(ConversationID id, Date when, Request request, Response response, String origin) {
+    	// 2011-03-14 - JLS - Adding a link between the request/response and the ConversationID - BEGIN
+	     if (null != id && null != request && null != response) {
+	     	     request.setConversationID(id);
+	     	     response.setConversationID(id);
+	     }
+	     // 2011-03-14 - JLS - Adding a link between the request/response and the ConversationID - END
         try {
             HttpUrl url = request.getURL();
             addUrl(url); // fires appropriate events

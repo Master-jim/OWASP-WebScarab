@@ -39,6 +39,7 @@
 
 package org.owasp.webscarab.model;
 
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
@@ -70,7 +71,7 @@ public class Message {
     private NamedValue[] NO_HEADERS = new NamedValue[0];
     
     private static final byte[] NO_CONTENT = new byte[0];
-    
+    private ConversationID conversationID = null ;
     InputStream _contentStream = null;
     ByteArrayOutputStream _content = null;
     boolean _chunked = false;
@@ -619,4 +620,17 @@ public class Message {
         return Arrays.equals(myContent, thatContent);
     }
     
+    public void setConversationID (ConversationID id) {
+    	if (id != null) {
+    		conversationID = id;
+    	}
+    }
+
+
+    /** Returns the conversation id of a Response object.
+     * @return null if the Response does not have a Conversation associated, else the corresponding ConversationID object.
+     */
+    public ConversationID getConversationID () {
+    	return conversationID;
+    }
 }
