@@ -45,12 +45,13 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 	private Boolean isTestingAllRequests = Boolean.FALSE;
 	
 	// Perform or not SQLi tests
-	private Boolean performSQLiTests = Boolean.TRUE;
+	//private Boolean performSQLiTests = Boolean.TRUE;
 	
 	// Perimeter URL of the target
 	private String _urlOfTarget = null;
 	
-	private TokenGenerator tokenGenerator;
+	private final TokenGenerator tokenGenerator;
+	private final static ConfigurationHolder configuration = new ConfigurationHolder();
 	
 	private final static String HEADER_PARAMETER_TESTED = "XSSng-Parameter-Tested";
 	private final static String HEADER_ORIGINAL_REQUESTID = "XSSng-Original-RequestId";
@@ -66,7 +67,7 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 		}
 			this.framework = framework;
 			model = new XSSCRLFngModel(framework.getModel());
-			tokenGenerator = new TokenGenerator(model, performSQLiTests);
+			tokenGenerator = new TokenGenerator(configuration);
 			
 		_urlOfTarget = Preferences.getPreference(PREFERENCE_PROPERTY_URLFILTER, "");
 		LOGGER.info ("Configured to perform tests on URL: " + _urlOfTarget);
@@ -329,19 +330,20 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 	* @return True if the plugin is currently testing for SQLi injections
 	**/
 	public Boolean isPerformingSQLiTests() {
-		return performSQLiTests;
+		// TODO: integrate a link from the panel to the ConfigurationHolder
+		return configuration.getPerformSQLiTests();
 	}
 	
 	/** Tells the plugin to tests SQL injection or not
 	* @param parameter True if the plugin must test for SQLi injections
 	**/
-	public void getPerformSQLiTests(Boolean parameter) {
+	public void setPerformSQLiTests(Boolean parameter) {
 		if (parameter == null) {
 			LOGGER.warning("Null parameter found, leaving!");
 			return;
 		}
-		performSQLiTests = parameter;
-		tokenGenerator.setPerformSQLiTests(performSQLiTests);
+		//performSQLiTests = parameter;
+		configuration.setPerformSQLiTests(parameter);
 	}
 	
 	/** Define the url of the target 
@@ -632,11 +634,10 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 						while (iteratorListOfTokensToTest.hasNext()) {
 							// Get the token generated to use as value
 							Token currentTokenToTest = iteratorListOfTokensToTest.next();
-							if (currentTokenToTest != null) {
 								String currentTokenToTestType = currentTokenToTest.getTokenType();
 								String currentTokenToTestValue = currentTokenToTest.getTokenValue();
 								if (currentTokenToTest.hasIndex()) {
-									currentTokenToTestType += "-" + currentTokenToTest.getTokenIndex();
+									currentTokenToTestType += "-" + currentTokenToTest.getTokenTestIndex();
 								} 
 								LOGGER.fine("Testing parameter: " + currentParameterName + " with value: " + currentTokenToTestValue + " and type is: " + currentTokenToTestType);
 
@@ -654,7 +655,6 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 								Request newRequestNoEncoding = sendGetRequest(originalRequest, originalQueryString, currentParameterName, newParameterValueNoEncoding);
 								markRequestAndOriginalConversationAsTested(originalId, newRequestNoEncoding, "GET", currentParameterName, currentTokenToTestType);
 									
-							}
 						}
 					}
 				}
