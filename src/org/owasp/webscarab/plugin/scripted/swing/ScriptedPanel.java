@@ -255,6 +255,7 @@ public class ScriptedPanel extends javax.swing.JPanel implements ScriptedUI, Swi
     }//GEN-LAST:event_newButtonActionPerformed
     
     private void stopButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stopButtonActionPerformed
+    	// TODO: Modify behavior to ensure that the Thread will stop
         _scripted.stopScript();
     }//GEN-LAST:event_stopButtonActionPerformed
     
