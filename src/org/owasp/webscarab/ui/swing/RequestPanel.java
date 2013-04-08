@@ -432,6 +432,7 @@ public class RequestPanel extends javax.swing.JPanel {
                 convertPostMenuItem.setEnabled(true);
                 convertMultipartMenuItem.setEnabled(true);
             } else if ("POST".equals(req.getMethod())) {
+            	// TODO: Take into account use of charset value (like: Content-Type: application/x-www-form-urlencoded; charset=UTF-8   )
                 if ("application/x-www-form-urlencoded".equals(req.getHeader("Content-Type"))) {
                     convertGetMenuItem.setEnabled(true);
                     convertMultipartMenuItem.setEnabled(true);
