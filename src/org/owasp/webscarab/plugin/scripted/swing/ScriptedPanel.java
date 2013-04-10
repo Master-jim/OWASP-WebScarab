@@ -50,6 +50,7 @@ public class ScriptedPanel extends javax.swing.JPanel implements ScriptedUI, Swi
         initComponents();
         _scripted = scripted;
         
+        // TODO: Implement an output in a logfile to have a trace of it even after WebScarab is closed 
         DocumentOutputStream dos = new DocumentOutputStream(10240);
         _printStream = new PrintStream(dos);
         outputTextArea.setDocument(dos.getDocument());
