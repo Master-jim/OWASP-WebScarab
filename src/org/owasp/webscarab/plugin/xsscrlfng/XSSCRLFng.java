@@ -4,6 +4,7 @@ package org.owasp.webscarab.plugin.xsscrlfng;
 import java.io.IOException;
 import java.util.logging.Logger;
 import org.owasp.webscarab.model.ConversationID;
+// TODO: try to use interfaces instead of direct implementations ?
 import org.owasp.webscarab.model.Request;
 import org.owasp.webscarab.model.HttpUrl;
 import org.owasp.webscarab.model.Response;
