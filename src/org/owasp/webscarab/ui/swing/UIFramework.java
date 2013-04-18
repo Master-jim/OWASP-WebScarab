@@ -44,6 +44,8 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.PatternSyntaxException;
@@ -73,6 +75,10 @@ import org.owasp.webscarab.util.TextFormatter;
 import org.owasp.webscarab.util.swing.DocumentHandler;
 import org.owasp.webscarab.util.swing.HeapMonitor;
 import org.owasp.webscarab.util.swing.SwingWorker;
+//2011-07-29 - JLS - Thread for automatic saving - BEGIN
+import java.util.Timer;
+import java.util.TimerTask;
+//2011-07-29 - JLS - Thread for automatic saving - END
 
 /**
  *
@@ -242,7 +248,38 @@ public class UIFramework extends JFrame implements WebScarabUI {
             }
         });
     }
+
+    // 2011-07-29 - JLS - Thread for automatic saving - BEGIN
+    private final Runnable doAutomaticSave = new Runnable() {
+    	    public void run() {
+    	    	    // 2011-11-14 - JLS - Modifying behavior (no thread creation and only using saveSessionData() - BEGIN
+    	    	    if (_framework.isRunning() && _framework.isModified()) {
+    	    	    	    if (_framework.isBusy()) {
+    	    	    	    	    _logger.info("Not saving session as plugins are busy");
+    	    	    	    } else {
+    	    	    	    	    try {
+    	    	    	    	    	    _logger.info("Automatic saving...");
+    	    	    	    	    	    _framework.saveSessionData();
+    	    	    	    	    	    _logger.info("Automatic saving done well.");
+    	    	    	    	    } catch (StoreException se) {
+    	    	    	    	    	    _logger.severe("Error saving session: "+se);
+    	    	    	    	    }
+    	    	    	    }
+    	    	    } else {
+    	    	    	    _logger.fine("Not saving session as the framework has not been modified.");
+    	    	    }
+    	    	    // 2011-11-14 - JLS - Modifying behavior (no thread creation and only using saveSessionData() - END
+    	    }
+    };
     
+    TimerTask automaticSaveTimerTask = new TimerTask() {
+    	    public void run() {
+    	    	    java.awt.EventQueue.invokeLater(doAutomaticSave);
+    	    }
+    };
+    private static Timer uiTimer = new Timer();
+    // 2011-07-29 - JLS - Thread for automatic saving - END
+ 
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -565,6 +602,10 @@ public class UIFramework extends JFrame implements WebScarabUI {
 
         setJMenuBar(mainMenuBar);
 
+        // 2011-07-29 - JLS - Thread for automatic saving - END
+        uiTimer.schedule(automaticSaveTimerTask, 35000, 30000);
+        // 2011-07-29 - JLS - Thread for automatic saving - END
+        
     }// </editor-fold>//GEN-END:initComponents
 
     private void showDropPatternDialogMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showDropPatternDialogMenuItemActionPerformed
