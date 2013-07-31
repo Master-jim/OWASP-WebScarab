@@ -33,6 +33,7 @@ public class EditorFactory {
     
     static {
         _editors = new LinkedHashMap<String, List<String>>(); // this helps to maintain the order of the editors
+        // TODO: Generate these lines in a dynamic way, by each editor. Right now, each editor has a content filter and it must be "duplicated" below.
         registerEditor("multipart/form-data; *.*", "org.owasp.webscarab.ui.swing.editors.MultiPartPanel");
         registerEditor("application/x-serialized-object", "org.owasp.webscarab.ui.swing.editors.SerializedObjectPanel");
         registerEditor("image/.*", "org.owasp.webscarab.ui.swing.editors.ImagePanel");
