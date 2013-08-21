@@ -69,6 +69,7 @@ public class RequestPanel extends javax.swing.JPanel {
     
     private int _selected = 0;
     
+    // TODO: implement a removeNotify to release correctly the big variables
     private Request _request = null;
     private MessagePanel _messagePanel;
     private TextPanel _textPanel;

@@ -63,6 +63,7 @@ public class ContentPanel extends javax.swing.JPanel {
     private boolean _editable = false;
     private boolean _modified = false;
     
+    // TODO: implement a removeNotify to release correctly the big variables
     private byte[] _data = null;
     
     private ByteArrayEditor[] _editors = null;
