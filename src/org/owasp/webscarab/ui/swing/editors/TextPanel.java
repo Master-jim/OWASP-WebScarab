@@ -74,6 +74,7 @@ public class TextPanel extends javax.swing.JPanel implements ByteArrayEditor {
     private boolean _editable = false;
     private boolean _modified = false;
     
+    // TODO: implement a removeNotify to release correctly the big variables, like _text or _bytes, the RegexSearcher, the textTextArea, etc.
     private byte[] _bytes = null;
     private String _charset = null;
     private String _text = null;
