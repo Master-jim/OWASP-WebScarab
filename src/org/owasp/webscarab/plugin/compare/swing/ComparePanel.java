@@ -196,6 +196,7 @@ public class ComparePanel extends javax.swing.JPanel implements SwingPluginUI {
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    //TODO: Verify that the current selected conversation exists before comparing it. It might generate an error if a new session has been loaded (it will try to get an invalid conversation Id)
     private javax.swing.JComboBox baseComboBox;
     private javax.swing.JSplitPane compareSplitPane;
     private javax.swing.JTable conversationTable;
