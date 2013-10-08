@@ -89,29 +89,31 @@ public class FrameworkModel {
         _urlModel = new FrameworkUrlModel();
     }
     
-    public void setSession(String type, Object store, String session) throws StoreException {
-        try {
-            _rwl.writeLock().acquire();
+    public void setSession(String type, Object store, String session) throws StoreException {        
             if (type.equals("FileSystem") && store instanceof File) {
+            	// Get the lock to modify the session
+                try {
+                    _rwl.writeLock().acquire();
+                } catch (InterruptedException ie) {
+                	_logger.severe("Interrupted! " + ie);
+                	throw new StoreException("Error while acquiring lock: " + ie.getMessage());
+                }
+                // Create the new session
                 try {
                     _store = new FileSystemStore((File) store);
                 } catch (Exception e) {
-                	_rwl.writeLock().release();
                     throw new StoreException("Error initialising session : " + e.getMessage());
+                } finally {
+    	    	    // It will be released in case of exception but also at the end of this if
+    	    	    _rwl.writeLock().release();
                 }
-            } else {
-                _rwl.writeLock().release();
+                // Signal the modifications
+                _urlModel.fireUrlsChanged();
+                _conversationModel.fireConversationsChanged();
+                fireCookiesChanged();
+          } else {
                 throw new StoreException("Unknown store type " + type + " and store " + store);
             }
-            _rwl.writeLock().release();
-            _urlModel.fireUrlsChanged();
-            _conversationModel.fireConversationsChanged();
-            fireCookiesChanged();
-            //_rwl.readLock().release();
-        } catch (InterruptedException ie) {
-            _logger.severe("Interrupted! " + ie);
-        }
-        
     }
     
     public Sync readLock() {
