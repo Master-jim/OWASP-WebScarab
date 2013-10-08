@@ -219,7 +219,7 @@ public class FrameworkModel {
                     long time = Long.parseLong(when);
                     return new Date(time);
                 } catch (NumberFormatException nfe) {
-                    System.err.println("NumberFormatException parsing date for Conversation " + id + ": " + nfe);
+                    _logger.severe("NumberFormatException parsing date for Conversation " + id + ": " + nfe);
                     return null;
                 }
             } finally {
@@ -251,7 +251,7 @@ public class FrameworkModel {
                     _urlCache.put(conversation, httpUrl);
                     return httpUrl;
                 } catch (MalformedURLException mue) {
-                    System.err.println("Malformed URL for Conversation " + conversation + ": " + mue);
+                	_logger.severe("Malformed URL for Conversation " + conversation + ": " + mue);
                     return null;
                 }
             } finally {
