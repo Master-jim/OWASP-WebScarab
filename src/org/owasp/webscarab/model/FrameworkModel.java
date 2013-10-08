@@ -295,20 +295,23 @@ public class FrameworkModel {
      */
     public boolean addConversationProperty(ConversationID conversation, String property, String value) {
         boolean change = false;
+        Boolean locked = Boolean.FALSE;
+    	// Get the lock
         try {
             _rwl.writeLock().acquire();
+            locked = Boolean.TRUE;
+        } catch (InterruptedException ie) {
+            _logger.severe("Interrupted! " + ie);
+        }
+    	if (locked) {
             change = _store.addConversationProperty(conversation, property, value);
-            _rwl.readLock().acquire(); // downgrade to read lock
             _rwl.writeLock().release();
             if (change) {
                 _conversationModel.fireConversationChanged(conversation, 0); // FIXME
                 fireConversationPropertyChanged(conversation, property);
             }
-            _rwl.readLock().release();
-        } catch (InterruptedException ie) {
-            _logger.severe("Interrupted! " + ie);
-        }
         _modified = _modified || change;
+    	}
         return change;
     }
     
