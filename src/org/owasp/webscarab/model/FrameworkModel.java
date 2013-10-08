@@ -90,30 +90,30 @@ public class FrameworkModel {
     }
     
     public void setSession(String type, Object store, String session) throws StoreException {        
-            if (type.equals("FileSystem") && store instanceof File) {
-            	// Get the lock to modify the session
-                try {
-                    _rwl.writeLock().acquire();
-                } catch (InterruptedException ie) {
-                	_logger.severe("Interrupted! " + ie);
-                	throw new StoreException("Error while acquiring lock: " + ie.getMessage());
-                }
-                // Create the new session
-                try {
-                    _store = new FileSystemStore((File) store);
-                } catch (Exception e) {
-                    throw new StoreException("Error initialising session : " + e.getMessage());
-                } finally {
-    	    	    // It will be released in case of exception but also at the end of this if
-    	    	    _rwl.writeLock().release();
-                }
-                // Signal the modifications
-                _urlModel.fireUrlsChanged();
-                _conversationModel.fireConversationsChanged();
-                fireCookiesChanged();
-          } else {
-                throw new StoreException("Unknown store type " + type + " and store " + store);
-            }
+    	if (type.equals("FileSystem") && store instanceof File) {
+    		// Get the lock to modify the session
+    		try {
+    			_rwl.writeLock().acquire();
+    		} catch (InterruptedException ie) {
+    			_logger.severe("Interrupted! " + ie);
+    			throw new StoreException("Error while acquiring lock: " + ie.getMessage());
+    		}
+    		// Create the new session
+    		try {
+    			_store = new FileSystemStore((File) store);
+    		} catch (Exception e) {
+    			throw new StoreException("Error initialising session : " + e.getMessage());
+    		} finally {
+    			// It will be released in case of exception but also at the end of this if
+    			_rwl.writeLock().release();
+    		}
+    		// Signal the modifications
+    		_urlModel.fireUrlsChanged();
+    		_conversationModel.fireConversationsChanged();
+    		fireCookiesChanged();
+    	} else {
+    		throw new StoreException("Unknown store type " + type + " and store " + store);
+    	}
     }
     
     public Sync readLock() {
@@ -176,33 +176,33 @@ public class FrameworkModel {
      * @param origin the plugin that created this conversation
      */
     public void addConversation(ConversationID id, Date when, Request request, Response response, String origin) {
-            HttpUrl url = request.getURL();
-            addUrl(url); // fires appropriate events
-            Boolean locked = Boolean.FALSE;
-            // Get the lock
-            try {
-            _rwl.writeLock().acquire();
-            	locked = Boolean.TRUE;
-	            } catch (InterruptedException ie) {
-	            	_logger.severe("Interrupted! " + ie);
-	            } 
-            if (locked) {
-            int index = _store.addConversation(id, when, request, response);
-            _store.setConversationProperty(id, "METHOD", request.getMethod());
-            _store.setConversationProperty(id, "URL", request.getURL().toString());
-            _store.setConversationProperty(id, "STATUS", response.getStatusLine());
-            _store.setConversationProperty(id, "WHEN", Long.toString(when.getTime()));
-            _store.setConversationProperty(id, "ORIGIN", origin);
-            byte[] content=response.getContent();
-            if (content != null && content.length > 0) {
-            	_store.setConversationProperty(id, "RESPONSE_SIZE", Integer.toString(content.length));
-            }
-            _rwl.writeLock().release();
-            _conversationModel.fireConversationAdded(id, index); // FIXME
-            addUrlProperty(url, "METHODS", request.getMethod());
-            addUrlProperty(url, "STATUS", response.getStatusLine());
-        _modified = true;
-            }
+    	HttpUrl url = request.getURL();
+    	addUrl(url); // fires appropriate events
+    	Boolean locked = Boolean.FALSE;
+    	// Get the lock
+    	try {
+    		_rwl.writeLock().acquire();
+    		locked = Boolean.TRUE;
+    	} catch (InterruptedException ie) {
+    		_logger.severe("Interrupted! " + ie);
+    	} 
+    	if (locked) {
+    		int index = _store.addConversation(id, when, request, response);
+    		_store.setConversationProperty(id, "METHOD", request.getMethod());
+    		_store.setConversationProperty(id, "URL", request.getURL().toString());
+    		_store.setConversationProperty(id, "STATUS", response.getStatusLine());
+    		_store.setConversationProperty(id, "WHEN", Long.toString(when.getTime()));
+    		_store.setConversationProperty(id, "ORIGIN", origin);
+    		byte[] content=response.getContent();
+    		if (content != null && content.length > 0) {
+    			_store.setConversationProperty(id, "RESPONSE_SIZE", Integer.toString(content.length));
+    		}
+    		_rwl.writeLock().release();
+    		_conversationModel.fireConversationAdded(id, index); // FIXME
+    		addUrlProperty(url, "METHODS", request.getMethod());
+    		addUrlProperty(url, "STATUS", response.getStatusLine());
+    		_modified = true;
+    	}
     }
     
     public String getConversationOrigin(ConversationID id) {
