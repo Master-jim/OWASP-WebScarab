@@ -176,10 +176,17 @@ public class FrameworkModel {
      * @param origin the plugin that created this conversation
      */
     public void addConversation(ConversationID id, Date when, Request request, Response response, String origin) {
-        try {
             HttpUrl url = request.getURL();
             addUrl(url); // fires appropriate events
+            Boolean locked = Boolean.FALSE;
+            // Get the lock
+            try {
             _rwl.writeLock().acquire();
+            	locked = Boolean.TRUE;
+	            } catch (InterruptedException ie) {
+	            	_logger.severe("Interrupted! " + ie);
+	            } 
+            if (locked) {
             int index = _store.addConversation(id, when, request, response);
             _store.setConversationProperty(id, "METHOD", request.getMethod());
             _store.setConversationProperty(id, "URL", request.getURL().toString());
@@ -187,18 +194,15 @@ public class FrameworkModel {
             _store.setConversationProperty(id, "WHEN", Long.toString(when.getTime()));
             _store.setConversationProperty(id, "ORIGIN", origin);
             byte[] content=response.getContent();
-            if (content != null && content.length > 0)
+            if (content != null && content.length > 0) {
             	_store.setConversationProperty(id, "RESPONSE_SIZE", Integer.toString(content.length));
-            _rwl.readLock().acquire();
+            }
             _rwl.writeLock().release();
             _conversationModel.fireConversationAdded(id, index); // FIXME
-            _rwl.readLock().release();
             addUrlProperty(url, "METHODS", request.getMethod());
             addUrlProperty(url, "STATUS", response.getStatusLine());
-        } catch (InterruptedException ie) {
-            _logger.severe("Interrupted! " + ie);
-        }
         _modified = true;
+            }
     }
     
     public String getConversationOrigin(ConversationID id) {
