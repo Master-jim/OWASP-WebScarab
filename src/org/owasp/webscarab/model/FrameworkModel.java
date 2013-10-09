@@ -359,46 +359,61 @@ public class FrameworkModel {
     }
     
     private void addUrl(HttpUrl url) {
+    	Boolean readLocked = Boolean.FALSE;
+    	Boolean writeLocked = Boolean.FALSE;
+    	// Get the read lock to look for the URL
         try {
             _rwl.readLock().acquire();
-            try {
-                if (!_store.isKnownUrl(url)) {
+            readLocked = Boolean.TRUE;
+        } catch (InterruptedException ie) {
+            _logger.severe("Interrupted! " + ie);
+        }
+
+            //try {
+        // If the URL is not known
+                if (readLocked && !_store.isKnownUrl(url)) {
+                	_rwl.readLock().release();
+                    readLocked = Boolean.FALSE;
                     HttpUrl[] path = url.getUrlHierarchy();
+                    // We prepared the URL to add and go for it
                     for (int i=0; i<path.length; i++) {
-                        if (!_store.isKnownUrl(path[i])) {
-                            _rwl.readLock().release(); // must give it up before writing
-                            // XXX We could be vulnerable to a race condition here
-                            // we should check again to make sure that it does not exist
-                            // AFTER we get our writelock
-                            
-                            // FIXME There is something very strange going on here
-                            // sometimes we deadlock if we just do a straight acquire
-                            // but there does not seem to be anything competing for the lock.
-                            // This works, but it feels like a kluge! FIXME!!!
-                            // _rwl.writeLock().acquire();
-                            while (!_rwl.writeLock().attempt(5000)) {
-                                _logger.severe("Timed out waiting for write lock, trying again");
-                                _rwl.debug();
-                            }
-                            if (!_store.isKnownUrl(path[i])) {
+                    	// Get the read lock again to be sure it's not present
+                    	try {
+                            _rwl.readLock().acquire();
+                            readLocked = Boolean.TRUE;
+                        } catch (InterruptedException ie) {
+                            _logger.severe("Interrupted! " + ie);
+                        }
+                    	// If it's not present, we add it
+                        if (readLocked && !_store.isKnownUrl(path[i])) {
+                        	// Get the Write lock
+                        	try {
+                        		// Release the read lock
+                        		_rwl.readLock().release();
+                        		readLocked = Boolean.FALSE;
+                        		
+                        		_rwl.writeLock().acquire();
+                        		writeLocked = Boolean.TRUE;
+                        	} catch (InterruptedException ie) {
+                        		_logger.severe("Interrupted! " + ie);
+                        	}
+                        	// We managed to get the write lock so we add it to the store and release it.
+                        	if (writeLocked) {
                                 _store.addUrl(path[i]);
-                                _rwl.readLock().acquire(); // downgrade without giving up lock
                                 _rwl.writeLock().release();
-                                _urlModel.fireUrlAdded(path[i], 0); // FIXME
+                                writeLocked = Boolean.FALSE;
                                 _modified = true;
-                            } else { // modified by some other thread?! Go through the motions . . .
-                                _rwl.readLock().acquire();
-                                _rwl.writeLock().release();
+                                _urlModel.fireUrlAdded(path[i], 0);
+                        	} else {
+                        		_logger.severe("Unable to write lock the store. Should not happen!");
                             }
                         }
                     }
                 }
-            } finally {
+           /* } finally {
                 _rwl.readLock().release();
             }
-        } catch (InterruptedException ie) {
-            _logger.severe("Interrupted! " + ie);
-        }
+            */
     }
     
     /**
