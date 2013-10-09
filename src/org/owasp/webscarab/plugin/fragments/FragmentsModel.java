@@ -301,17 +301,21 @@ public class FragmentsModel extends AbstractPluginModel {
         }
         
         public void fragmentsChanged() {
+        	Boolean writeLocked = Boolean.FALSE;
             try {
                 _rwl.writeLock().acquire();
+                writeLocked = Boolean.TRUE;
+            } catch (InterruptedException ie) {
+                _logger.severe("Interrupted! " + ie);
+            }
+            if(writeLocked) {
                 _key = null;
                 _type = null;
                 _conversationList.clear();
-                _rwl.readLock().acquire();
+                //_rwl.readLock().acquire();
                 _rwl.writeLock().release();
                 fireConversationsChanged();
-                _rwl.readLock().release();
-            } catch (InterruptedException ie) {
-                _logger.severe("Interrupted! " + ie);
+                //_rwl.readLock().release();
             }
         }
         
