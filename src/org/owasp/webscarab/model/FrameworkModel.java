@@ -240,29 +240,42 @@ public class FrameworkModel {
      */
     
     public HttpUrl getRequestUrl(ConversationID conversation) {
+    	HttpUrl returnValue = null;
         try {
             _rwl.readLock().acquire();
-            try {
                 // this allows us to reuse HttpUrl objects
-                if (_urlCache.containsKey(conversation))
-                    return (HttpUrl) _urlCache.get(conversation);
-                
+                if (_urlCache.containsKey(conversation)) {
+                	returnValue = (HttpUrl) _urlCache.get(conversation);
+                	_rwl.readLock().release();
+                } else {
+                	// URL is not in cache
+                	_rwl.readLock().release();
                 String url = getConversationProperty(conversation, "URL");
+                HttpUrl httpUrl = null;
                 try {
-                    HttpUrl httpUrl = new HttpUrl(url);
-                    _urlCache.put(conversation, httpUrl);
-                    return httpUrl;
+                    httpUrl = new HttpUrl(url);
                 } catch (MalformedURLException mue) {
                 	_logger.severe("Malformed URL for Conversation " + conversation + ": " + mue);
-                    return null;
                 }
-            } finally {
-                _rwl.readLock().release();
-            }
+                if(null != httpUrl) {
+                	Boolean writeLocked = Boolean.FALSE;
+                	try {
+                		_rwl.writeLock().acquire();
+                		writeLocked = Boolean.TRUE;
+                	} catch (InterruptedException ie) {
+                		_logger.severe("Interrupted! " + ie);
+                	}
+                	if (writeLocked) {
+                		_urlCache.put(conversation, httpUrl);
+                		returnValue = httpUrl;
+                		_rwl.writeLock().release();
+                	}
+                }
+                }
         } catch (InterruptedException ie) {
             _logger.severe("Interrupted! " + ie);
-            return null;
         }
+        return returnValue;
     }
     
     /**
