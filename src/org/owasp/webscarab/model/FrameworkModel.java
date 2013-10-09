@@ -210,24 +210,27 @@ public class FrameworkModel {
     }
     
     public Date getConversationDate(ConversationID id) {
+    	Boolean readLocked = Boolean.FALSE;
+    	Date returnValue = null;
         try {
             _rwl.readLock().acquire();
-            try {
-                String when = getConversationProperty(id, "WHEN");
-                _rwl.readLock().release();
-                if (when == null) return null;
-                try {
-                    long time = Long.parseLong(when);
-                    return new Date(time);
-                } catch (NumberFormatException nfe) {
-                    _logger.severe("NumberFormatException parsing date for Conversation " + id + ": " + nfe);
-                    return null;
-                }
-            }
+            readLocked = Boolean.TRUE;
         } catch (InterruptedException ie) {
             _logger.severe("Interrupted! " + ie);
-            return null;
         }
+            if(readLocked) {
+                String when = getConversationProperty(id, "WHEN");
+                _rwl.readLock().release();
+                if (null != when) {
+                try {
+                    long time = Long.parseLong(when);
+                    returnValue = new Date(time);
+                } catch (NumberFormatException nfe) {
+                    _logger.severe("NumberFormatException parsing date for Conversation " + id + ": " + nfe);
+                }
+                }
+            }
+            return returnValue;
     }
     
     /**
