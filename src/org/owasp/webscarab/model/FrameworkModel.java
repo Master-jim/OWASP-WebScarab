@@ -214,6 +214,7 @@ public class FrameworkModel {
             _rwl.readLock().acquire();
             try {
                 String when = getConversationProperty(id, "WHEN");
+                _rwl.readLock().release();
                 if (when == null) return null;
                 try {
                     long time = Long.parseLong(when);
@@ -222,8 +223,6 @@ public class FrameworkModel {
                     _logger.severe("NumberFormatException parsing date for Conversation " + id + ": " + nfe);
                     return null;
                 }
-            } finally {
-                _rwl.readLock().release();
             }
         } catch (InterruptedException ie) {
             _logger.severe("Interrupted! " + ie);
