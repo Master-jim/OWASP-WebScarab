@@ -451,20 +451,24 @@ public class FrameworkModel {
     public boolean addUrlProperty(HttpUrl url, String property, String value) {
         boolean change = false;
         addUrl(url);
+    	Boolean writeLocked = Boolean.FALSE;
         try {
             _rwl.writeLock().acquire();
+            writeLocked = Boolean.TRUE;
+        } catch (InterruptedException ie) {
+            _logger.severe("Interrupted! " + ie);
+        }
+        if (writeLocked) {
             change = _store.addUrlProperty(url, property, value);
-            _rwl.readLock().acquire();
+            //_rwl.readLock().acquire();
             _rwl.writeLock().release();
             if (change) {
                 _urlModel.fireUrlChanged(url, 0);
                 fireUrlPropertyChanged(url, property);
             }
-            _rwl.readLock().release();
-        } catch (InterruptedException ie) {
-            _logger.severe("Interrupted! " + ie);
-        }
+            //_rwl.readLock().release();
         _modified = _modified || change;
+        }
         return change;
     }
     
