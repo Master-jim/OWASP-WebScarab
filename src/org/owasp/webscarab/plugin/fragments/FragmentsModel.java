@@ -224,8 +224,14 @@ public class FragmentsModel extends AbstractPluginModel {
         }
         
         public void setSelectedFragment(String type, String key) {
+        	Boolean writeLocked = Boolean.FALSE;
             try {
                 _rwl.writeLock().acquire();
+                writeLocked = Boolean.TRUE;
+            } catch (InterruptedException ie) {
+                _logger.severe("Interrupted! " + ie);
+            }
+            if(writeLocked) {
                 _type = type;
                 _key = key;
                 _conversationList.clear();
@@ -245,12 +251,10 @@ public class FragmentsModel extends AbstractPluginModel {
                         }
                     }
                 }
-                _rwl.readLock().acquire();
+                //_rwl.readLock().acquire();
                 _rwl.writeLock().release();
                 fireConversationsChanged();
-                _rwl.readLock().release();
-            } catch (InterruptedException ie) {
-                _logger.severe("Interrupted! " + ie);
+                //_rwl.readLock().release();
             }
         }
         
