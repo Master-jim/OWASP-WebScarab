@@ -730,20 +730,23 @@ public class FrameworkModel {
      * @param cookie the cookie to remove
      */
     public void removeCookie(Cookie cookie) {
+    	Boolean writeLocked = Boolean.FALSE;
         try {
             _rwl.writeLock().acquire();
-            boolean deleted = _store.removeCookie(cookie);
-            if (deleted) {
-                _modified = true;
-                _rwl.readLock().acquire();
-                _rwl.writeLock().release();
-                fireCookieRemoved(cookie);
-                _rwl.readLock().release();
-            } else {
-                _rwl.writeLock().release();
-            }
+            writeLocked = Boolean.TRUE;
         } catch (InterruptedException ie) {
             _logger.severe("Interrupted! " + ie);
+        }
+        if(writeLocked) {
+            boolean deleted = _store.removeCookie(cookie);
+            _rwl.writeLock().release();
+            if (deleted) {
+                _modified = true;
+                //_rwl.readLock().acquire();
+                //_rwl.writeLock().release();
+                fireCookieRemoved(cookie);
+                //_rwl.readLock().release();
+            }
         }
     }
     
