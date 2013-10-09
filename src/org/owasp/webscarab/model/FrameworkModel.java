@@ -704,20 +704,24 @@ public class FrameworkModel {
      * @param cookie the cookie to add
      */
     public void addCookie(Cookie cookie) {
+    	Boolean writeLocked = Boolean.FALSE;
         try {
             _rwl.writeLock().acquire();
-            boolean added = _store.addCookie(cookie);
-            if (! added) { // we already had the cookie
-                _rwl.writeLock().release();
-            } else {
-                _modified = true;
-                _rwl.readLock().acquire();
-                _rwl.writeLock().release();
-                fireCookieAdded(cookie);
-                _rwl.readLock().release();
-            }
+            writeLocked = Boolean.TRUE;
         } catch (InterruptedException ie) {
             _logger.severe("Interrupted! " + ie);
+        }
+        if(writeLocked) {
+            boolean added = _store.addCookie(cookie);
+            _rwl.writeLock().release();
+            
+            if (added) {
+                _modified = true;
+                //_rwl.readLock().acquire();
+                //_rwl.writeLock().release();
+                fireCookieAdded(cookie);
+                //_rwl.readLock().release();
+            }
         }
     }
     
