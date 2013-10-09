@@ -139,15 +139,17 @@ public class FragmentsModel extends AbstractPluginModel {
     }
     
     public void setSelectedFragment(String type, String key) {
+    	Boolean writeLocked = Boolean.FALSE;
         try {
             _rwl.writeLock().acquire();
-            _rwl.readLock().acquire();
-            _rwl.writeLock().release();
-            _rwl.readLock().release();
+            writeLocked = Boolean.TRUE;
         } catch (InterruptedException ie) {
             _logger.severe("Interrupted! " + ie);
         }
+        if (writeLocked) {
         _fcm.setSelectedFragment(type, key);
+        _rwl.writeLock().release();
+        }
     }
     
     public void setStore(FragmentsStore store) {
