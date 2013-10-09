@@ -424,18 +424,22 @@ public class FrameworkModel {
      */
     public void setUrlProperty(HttpUrl url, String property, String value) {
         addUrl(url);
+    	Boolean writeLocked = Boolean.FALSE;
         try {
             _rwl.writeLock().acquire();
-            _store.setUrlProperty(url, property, value);
-            _rwl.readLock().acquire(); // downgrade write to read
-            _rwl.writeLock().release();
-            _urlModel.fireUrlChanged(url, 0); // FIXME
-            fireUrlPropertyChanged(url, property);
-            _rwl.readLock().release();
+            writeLocked = Boolean.TRUE;
         } catch (InterruptedException ie) {
             _logger.severe("Interrupted! " + ie);
         }
+            if (writeLocked) {
+            _store.setUrlProperty(url, property, value);
+            //_rwl.readLock().acquire(); // downgrade write to read
+            _rwl.writeLock().release();
+            _urlModel.fireUrlChanged(url, 0); // FIXME
+            fireUrlPropertyChanged(url, property);
+            //_rwl.readLock().release();
         _modified = true;
+            }
     }
     
     /**
