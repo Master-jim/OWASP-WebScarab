@@ -51,22 +51,26 @@ public class FragmentsModel extends AbstractPluginModel {
     }
     
     public void addFragment(HttpUrl url, ConversationID id, String type, String fragment) {
-        try {
+    	Boolean writeLocked = Boolean.FALSE;
+    	try {
             _rwl.writeLock().acquire();
-            String key = Encoding.hashMD5(fragment);
+            writeLocked = Boolean.TRUE;
+        } catch (InterruptedException ie) {
+            _logger.severe("Interrupted! " + ie);
+        }
+    	if (writeLocked) {
+           String key = Encoding.hashMD5(fragment);
             int position = _store.putFragment(type, key, fragment);
-            _rwl.readLock().acquire();
+            //_rwl.readLock().acquire();
             _rwl.writeLock().release();
             _model.addConversationProperty(id, type, key);
             _model.addUrlProperty(url, type, key);
             fireFragmentAdded(url, id, type, key);
             if (position>-1)
                 fireFragmentAdded(type, key, position);
-            _rwl.readLock().release();
-        } catch (InterruptedException ie) {
-            _logger.severe("Interrupted! " + ie);
-        }
+            //_rwl.readLock().release();
         setModified(true);
+    	}
     }
     
     public String[] getUrlFragmentKeys(HttpUrl url, String type) {
