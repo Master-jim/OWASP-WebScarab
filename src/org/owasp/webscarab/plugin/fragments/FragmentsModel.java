@@ -281,15 +281,19 @@ public class FragmentsModel extends AbstractPluginModel {
                 if (_type.equals(type) && _key.equals(key)) {
                     int index = getIndexOfConversation(id);
                     if (index < 0) {
+                    	Boolean writeLocked = Boolean.FALSE;
                         try {
                             _rwl.writeLock().acquire();
-                            _conversationList.add(-index-1, id);
-                            _rwl.readLock().acquire();
-                            _rwl.writeLock().release();
-                            fireConversationAdded(id,  -index-1);
-                            _rwl.readLock().release();
+                            writeLocked = Boolean.TRUE;
                         } catch (InterruptedException ie) {
                             _logger.severe("Interrupted! " + ie);
+                        }
+                        if (writeLocked) {
+                            _conversationList.add(-index-1, id);
+                            //_rwl.readLock().acquire();
+                            _rwl.writeLock().release();
+                            fireConversationAdded(id,  -index-1);
+                            //_rwl.readLock().release();
                         }
                     }
                 }
