@@ -6,8 +6,6 @@
 
 package org.owasp.webscarab.model;
 
-import EDU.oswego.cs.dl.util.concurrent.Sync;
-
 /**
  *
  * @author  rogan
@@ -19,9 +17,7 @@ public interface UrlModel {
     HttpUrl getChildAt(HttpUrl parent, int index);
     
     int getIndexOf(HttpUrl url);
-    
-    Sync readLock();
-    
+        
     void addUrlListener(UrlListener listener);
     
     void removeUrlListener(UrlListener listener);
