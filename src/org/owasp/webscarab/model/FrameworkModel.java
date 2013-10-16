@@ -76,7 +76,6 @@ public class FrameworkModel {
     private FrameworkConversationModel _conversationModel;
     
     private boolean _modified = false;
-    private Boolean DEBUG_WRITE_LOCK = Boolean.FALSE;
     private Logger _logger = Logger.getLogger(getClass().getName());
     
     /**
@@ -115,53 +114,53 @@ public class FrameworkModel {
     }
     
     protected void writeLock() throws InterruptedException {
-    	if (DEBUG_WRITE_LOCK) {
+    	if (_logger.getLevel() == Level.FINER) {
     		System.err.println("\n");
-    		_logger.severe("BEGIN ############################################");
-    		_logger.severe("_rwl.writeLock().lockInterruptibly() TRY");
-    		_logger.severe("Writelock is locked: " + _rwl.isWriteLocked());
-    		_logger.severe("Writelock is from:");
+    		_logger.finer("BEGIN ############################################");
+    		_logger.finer("_rwl.writeLock().lockInterruptibly() TRY");
+    		_logger.finer("Writelock is locked: " + _rwl.isWriteLocked());
+    		_logger.finer("Writelock is from:");
     		Thread.dumpStack();
     	}
 		_rwl.writeLock().lockInterruptibly();
-    	if (DEBUG_WRITE_LOCK) {
-    		_logger.severe("_rwl.writeLock().lockInterruptibly() DONE");
-    		_logger.severe("END ---------------------------------------------");
+    	if (_logger.getLevel() == Level.FINER) {
+    		_logger.finer("_rwl.writeLock().lockInterruptibly() DONE");
+    		_logger.finer("END ---------------------------------------------");
     		System.err.println("\n\n");
     	}
     }
 
     protected void writeUnlock() {
-    	if (DEBUG_WRITE_LOCK) {
-    		_logger.severe("_rwl.writeLock().unlock()");
+    	if (_logger.getLevel() == Level.FINER) {
+    		_logger.finer("_rwl.writeLock().unlock()");
     	}
 		_rwl.writeLock().unlock();
     }
 
     protected void readLock() throws InterruptedException {
-    	if (DEBUG_WRITE_LOCK) {
+    	if (_logger.getLevel() == Level.FINER) {
     		System.err.println("\n");
-    		_logger.severe("READ BEGIN //////////////////////////////////////////////");
-    		_logger.severe("_rwl.readLock().lockInterruptibly() TRY");
-    		_logger.severe("Lock has currently " + _rwl.getReadLockCount() + " read locks.");
+    		_logger.finer("READ BEGIN //////////////////////////////////////////////");
+    		_logger.finer("_rwl.readLock().lockInterruptibly() TRY");
+    		_logger.finer("Lock has currently " + _rwl.getReadLockCount() + " read locks.");
     		Thread.dumpStack();
     	}
 		_rwl.readLock().lockInterruptibly();
-    	if (DEBUG_WRITE_LOCK) {
-    		_logger.severe("_rwl.readLock().lockInterruptibly() DONE");
-    		_logger.severe("Lock has currently " + _rwl.getReadLockCount() + " read locks.");
-    		_logger.severe("READ END ................................................");
+    	if (_logger.getLevel() == Level.FINER) {
+    		_logger.finer("_rwl.readLock().lockInterruptibly() DONE");
+    		_logger.finer("Lock has currently " + _rwl.getReadLockCount() + " read locks.");
+    		_logger.finer("READ END ................................................");
     		System.err.println("\n\n");
     	}
     }
 
     protected void readUnlock() {
-    	if (DEBUG_WRITE_LOCK) {
-    		_logger.severe("_rwl.readLock().unlock()");
+    	if (_logger.getLevel() == Level.FINER) {
+    		_logger.finer("_rwl.readLock().unlock()");
     	}
     	_rwl.readLock().unlock();
-    	if (DEBUG_WRITE_LOCK) {
-    		_logger.severe("Lock has NOW " + _rwl.getReadLockCount() + " read locks.");
+    	if (_logger.getLevel() == Level.FINER) {
+    		_logger.finer("Lock has NOW " + _rwl.getReadLockCount() + " read locks.");
     	}
     }
 
