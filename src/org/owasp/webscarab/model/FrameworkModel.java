@@ -160,7 +160,9 @@ public class FrameworkModel {
     		_logger.severe("_rwl.readLock().unlock()");
     	}
     	_rwl.readLock().unlock();
-		_logger.severe("Lock has NOW " + _rwl.getReadLockCount() + " read locks.");
+    	if (DEBUG_WRITE_LOCK) {
+    		_logger.severe("Lock has NOW " + _rwl.getReadLockCount() + " read locks.");
+    	}
     }
 
     public UrlModel getUrlModel() {
