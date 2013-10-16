@@ -76,7 +76,7 @@ public class FrameworkModel {
     private FrameworkConversationModel _conversationModel;
     
     private boolean _modified = false;
-    private Boolean DEBUG_WRITE_LOCK = Boolean.TRUE;
+    private Boolean DEBUG_WRITE_LOCK = Boolean.FALSE;
     private Logger _logger = Logger.getLogger(getClass().getName());
     
     /**
