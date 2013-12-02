@@ -70,6 +70,8 @@ import org.owasp.webscarab.plugin.wsfed.WSFederation;
 import org.owasp.webscarab.plugin.wsfed.swing.WSFederationPanel;
 import org.owasp.webscarab.plugin.xsscrlf.XSSCRLF;
 import org.owasp.webscarab.plugin.xsscrlf.swing.XSSCRLFPanel;
+import org.owasp.webscarab.plugin.xsscrlfng.XSSCRLFng;
+import org.owasp.webscarab.plugin.xsscrlfng.swing.XSSCRLFngPanel;
 import org.owasp.webscarab.ui.swing.Lite;
 import org.owasp.webscarab.ui.swing.UIFramework;
 import org.owasp.webscarab.ui.swing.WebScarabUI;
@@ -219,6 +221,12 @@ public class WebScarab {
         XSSCRLF xsscrlf = new XSSCRLF(framework);
         framework.addPlugin(xsscrlf);
         uif.addPlugin(new XSSCRLFPanel(xsscrlf));
+        
+        // 2011-01-21 - JLS - Adding Support of XSSCRLFng only - BEGIN
+        XSSCRLFng xsscrlfng = new XSSCRLFng(framework);
+        framework.addPlugin(xsscrlfng);
+        uif.addPlugin(new XSSCRLFngPanel(xsscrlfng));
+        // 2011-01-21 - JLS - Adding Support of XSSCRLFng only - END
         
         SessionIDAnalysis sessionIDAnalysis = new SessionIDAnalysis(framework);
         framework.addPlugin(sessionIDAnalysis);
