@@ -242,15 +242,20 @@ public class SummaryPanel extends JPanel {
 						TableModel tm = conversationTable.getModel();
 						ConversationID id = null;
 						if (row > -1)
-							id = (ConversationID) tm.getValueAt(row, 0); // UGLY
-																			// hack!
-																			// FIXME!!!!
-						synchronized (_conversationActions) {
-							for (int i = 0; i < _conversationActions.size(); i++) {
-								Action action = _conversationActions.get(i);
-								action.putValue("CONVERSATION", id);
-								action.putValue("COMPONENT", conversationTable);
-							}
+						{
+							// IMPORTANT: Convert row value from index to model, to have the real row and not the index of the row displayed
+		                	int realRow = conversationTable.convertRowIndexToModel(row);
+		                	if (realRow >-1 && null != _conversationModel) {
+		                		id = _conversationModel.getConversationAt(realRow);
+								synchronized (_conversationActions) {
+									for (int i = 0; i < _conversationActions.size(); i++) {
+										Action action = _conversationActions.get(i);
+										action.putValue("CONVERSATION", id);
+										action.putValue("COMPONENT", conversationTable);
+									}
+								}
+		                		
+		                	}
 						}
 					}
 				});

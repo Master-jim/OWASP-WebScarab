@@ -35,8 +35,14 @@ public abstract class FilteredConversationModel extends AbstractConversationMode
     }
     
     protected void updateConversations() {
+    	Boolean writeLocked = Boolean.FALSE;
         try {
             _rwl.writeLock().acquire();
+            writeLocked = Boolean.TRUE;
+        } catch (InterruptedException ie) {
+            // _logger.warning("Interrupted waiting for the read lock! " + ie.getMessage());
+        }
+        if (writeLocked) {
             _conversations.clear();
             int count = _model.getConversationCount();
             for (int i=0 ; i<count; i++) {
@@ -45,105 +51,122 @@ public abstract class FilteredConversationModel extends AbstractConversationMode
                     _conversations.add(id);
                 }
             }
-            _rwl.readLock().acquire();
             _rwl.writeLock().release();
             fireConversationsChanged();
-            _rwl.readLock().release();
-        } catch (InterruptedException ie) {
-            // _logger.warning("Interrupted waiting for the read lock! " + ie.getMessage());
         }
     }
     
     public abstract boolean shouldFilter(ConversationID id);
     
     protected boolean isFiltered(ConversationID id) {
+    	Boolean readLocked = Boolean.FALSE;
+    	boolean valueReturned = false;
         try {
             _rwl.readLock().acquire();
-            return _conversations.indexOf(id) == -1;
+            readLocked = Boolean.TRUE;
         } catch (InterruptedException ie) {
             // _logger.warning("Interrupted waiting for the read lock! " + ie.getMessage());
-            return false;
-        } finally {
+        }
+        if (readLocked) {
+        	valueReturned = (_conversations.indexOf(id) == -1);
             _rwl.readLock().release();
         }
+        return valueReturned;
     }
     
     public ConversationID getConversationAt(int index) {
+    	Boolean readLocked = Boolean.FALSE;
+    	ConversationID valueReturned = null;
         try {
             _rwl.readLock().acquire();
-            return _conversations.get(index);
+            readLocked = Boolean.TRUE;
         } catch (InterruptedException ie) {
             // _logger.warning("Interrupted waiting for the read lock! " + ie.getMessage());
-            return null;
-        } finally {
+        }
+        if (readLocked) {
+        	valueReturned = _conversations.get(index);
             _rwl.readLock().release();
         }
+        return valueReturned;
     }
     
     public int getConversationCount() {
+    	Boolean readLocked = Boolean.FALSE;
+    	int valueReturned = 0;
         try {
             _rwl.readLock().acquire();
-            return _conversations.size();
+            readLocked = Boolean.TRUE;
         } catch (InterruptedException ie) {
             // _logger.warning("Interrupted waiting for the read lock! " + ie.getMessage());
-            return 0;
-        } finally {
+        }
+        if (readLocked) {
+        	valueReturned = _conversations.size();
             _rwl.readLock().release();
         }
+        return valueReturned;
     }
     
     public int getIndexOfConversation(ConversationID id) {
+    	Boolean readLocked = Boolean.FALSE;
+    	int valueReturned = -1;
         try {
             _rwl.readLock().acquire();
-            return Collections.binarySearch(_conversations, id);
+            readLocked = Boolean.TRUE;
         } catch (InterruptedException ie) {
             // _logger.warning("Interrupted waiting for the read lock! " + ie.getMessage());
-            return -1;
-        } finally {
+        }
+        if (readLocked) {
+        	valueReturned = Collections.binarySearch(_conversations, id);
             _rwl.readLock().release();
         }
+        return valueReturned;
     }
     
+    /*
     public Sync readLock() {
         return _rwl.readLock();
     }
-    
+    */
     private class Listener implements ConversationListener {
         
         public void conversationAdded(ConversationEvent evt) {
+        	Boolean writeLocked = Boolean.FALSE;
             ConversationID id = evt.getConversationID();
             if (! shouldFilter(id)) {
-                try {
-                    _rwl.writeLock().acquire();
                     int index = getIndexOfConversation(id);
                     if (index < 0) {
                         index = -index - 1;
+                        try {
+                        _rwl.writeLock().acquire();
+                        writeLocked = Boolean.TRUE;
+                        } catch (InterruptedException ie) {
+                            // _logger.warning("Interrupted waiting for the read lock! " + ie.getMessage());
+                        }
+                        if (writeLocked) {
                         _conversations.add(index, id);
+                        _rwl.writeLock().release();
+                        fireConversationAdded(id, index);
+                        }
                     }
-                    _rwl.readLock().acquire();
-                    _rwl.writeLock().release();
-                    fireConversationAdded(id, index);
-                    _rwl.readLock().release();
-                } catch (InterruptedException ie) {
-                    // _logger.warning("Interrupted waiting for the read lock! " + ie.getMessage());
-                }
             }
         }
         
         public void conversationChanged(ConversationEvent evt) {
+        	Boolean writeLocked = Boolean.FALSE;
             ConversationID id = evt.getConversationID();
             int index = getIndexOfConversation(id);
             if (shouldFilter(id)) {
                 if (index > -1) {
                     try {
                         _rwl.writeLock().acquire();
-                        _conversations.remove(index);
-                        _rwl.readLock().acquire();
-                        _rwl.writeLock().release();
-                        fireConversationRemoved(id, index);
-                        _rwl.readLock().release();
+                        writeLocked = Boolean.TRUE;
                     } catch (InterruptedException ie) {
                         // _logger.warning("Interrupted waiting for the read lock! " + ie.getMessage());
+                    }
+                    if (writeLocked) {
+                        _conversations.remove(index);
+                        _rwl.writeLock().release();
+                        fireConversationRemoved(id, index);
                     }
                 }
             } else {
@@ -151,31 +174,34 @@ public abstract class FilteredConversationModel extends AbstractConversationMode
                     index = -index -1;
                     try {
                         _rwl.writeLock().acquire();
-                        _conversations.add(index, id);
-                        _rwl.readLock().acquire();
-                        _rwl.writeLock().release();
-                        fireConversationAdded(id, index);
-                        _rwl.readLock().release();
+                        writeLocked = Boolean.TRUE;
                     } catch (InterruptedException ie) {
                         // _logger.warning("Interrupted waiting for the read lock! " + ie.getMessage());
+                    }
+                    if (writeLocked) {
+                        _conversations.add(index, id);
+                        _rwl.writeLock().release();
+                        fireConversationAdded(id, index);
                     }
                 }
             }
         }
         
         public void conversationRemoved(ConversationEvent evt) {
+        	Boolean writeLocked = Boolean.FALSE;
             ConversationID id = evt.getConversationID();
             int index = getIndexOfConversation(id);
             if (index > -1) {
                 try {
                     _rwl.writeLock().acquire();
-                    _conversations.remove(index);
-                    _rwl.readLock().acquire();
-                    _rwl.writeLock().release();
-                    fireConversationRemoved(id, index);
-                    _rwl.readLock().release();
+                    writeLocked = Boolean.TRUE;
                 } catch (InterruptedException ie) {
                     // _logger.warning("Interrupted waiting for the read lock! " + ie.getMessage());
+                }
+                if (writeLocked) {
+                    _conversations.remove(index);
+                    _rwl.writeLock().release();
+                    fireConversationRemoved(id, index);
                 }
             }
         }

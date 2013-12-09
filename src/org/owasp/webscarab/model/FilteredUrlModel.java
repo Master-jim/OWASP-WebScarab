@@ -43,21 +43,10 @@ public abstract class FilteredUrlModel extends AbstractUrlModel {
     public FilteredUrlModel(UrlModel urlModel) {
         _logger.setLevel(Level.INFO);
         _urlModel = urlModel;
-        try {
-            _urlModel.readLock().acquire();
             updateFilteredUrls();
             _urlModel.addUrlListener(new Listener());
-        } catch (InterruptedException ie) {
-            _logger.warning("Interrupted waiting for the read lock! " + ie.getMessage());
-        } finally {
-            _urlModel.readLock().release();
-        }
     }
-    
-    public Sync readLock() {
-        return _urlModel.readLock();
-    }
-    
+
     protected void initFilters() {
         _filteredUrls = new HashSet<HttpUrl>();
         _implicitUrls = new HashSet<HttpUrl>();
@@ -114,9 +103,7 @@ public abstract class FilteredUrlModel extends AbstractUrlModel {
             hit++;
             return childList;
         }
-        try {
             childList = new ArrayList<HttpUrl>();
-            _urlModel.readLock().acquire();
             int count = _urlModel.getChildCount(parent);
             for (int i=0; i<count; i++) {
                 HttpUrl child = _urlModel.getChildAt(parent, i);
@@ -129,12 +116,6 @@ public abstract class FilteredUrlModel extends AbstractUrlModel {
                 _cache.put(parent, childList);
             }
             return childList;
-        } catch (InterruptedException ie) {
-            _logger.warning("Interrupted waiting for the read lock! " + ie.getMessage());
-        } finally {
-            _urlModel.readLock().release();
-        }
-        return null;
     }
     
     public int getChildCount(HttpUrl url) {

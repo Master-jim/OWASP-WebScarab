@@ -51,22 +51,26 @@ public class FragmentsModel extends AbstractPluginModel {
     }
     
     public void addFragment(HttpUrl url, ConversationID id, String type, String fragment) {
-        try {
+    	Boolean writeLocked = Boolean.FALSE;
+    	try {
             _rwl.writeLock().acquire();
-            String key = Encoding.hashMD5(fragment);
+            writeLocked = Boolean.TRUE;
+        } catch (InterruptedException ie) {
+            _logger.severe("Interrupted! " + ie);
+        }
+    	if (writeLocked) {
+           String key = Encoding.hashMD5(fragment);
             int position = _store.putFragment(type, key, fragment);
-            _rwl.readLock().acquire();
+            //_rwl.readLock().acquire();
             _rwl.writeLock().release();
             _model.addConversationProperty(id, type, key);
             _model.addUrlProperty(url, type, key);
             fireFragmentAdded(url, id, type, key);
             if (position>-1)
                 fireFragmentAdded(type, key, position);
-            _rwl.readLock().release();
-        } catch (InterruptedException ie) {
-            _logger.severe("Interrupted! " + ie);
-        }
+            //_rwl.readLock().release();
         setModified(true);
+    	}
     }
     
     public String[] getUrlFragmentKeys(HttpUrl url, String type) {
@@ -135,15 +139,17 @@ public class FragmentsModel extends AbstractPluginModel {
     }
     
     public void setSelectedFragment(String type, String key) {
+    	Boolean writeLocked = Boolean.FALSE;
         try {
             _rwl.writeLock().acquire();
-            _rwl.readLock().acquire();
-            _rwl.writeLock().release();
-            _rwl.readLock().release();
+            writeLocked = Boolean.TRUE;
         } catch (InterruptedException ie) {
             _logger.severe("Interrupted! " + ie);
         }
+        if (writeLocked) {
         _fcm.setSelectedFragment(type, key);
+        _rwl.writeLock().release();
+        }
     }
     
     public void setStore(FragmentsStore store) {
@@ -218,8 +224,14 @@ public class FragmentsModel extends AbstractPluginModel {
         }
         
         public void setSelectedFragment(String type, String key) {
+        	Boolean writeLocked = Boolean.FALSE;
             try {
                 _rwl.writeLock().acquire();
+                writeLocked = Boolean.TRUE;
+            } catch (InterruptedException ie) {
+                _logger.severe("Interrupted! " + ie);
+            }
+            if(writeLocked) {
                 _type = type;
                 _key = key;
                 _conversationList.clear();
@@ -239,12 +251,10 @@ public class FragmentsModel extends AbstractPluginModel {
                         }
                     }
                 }
-                _rwl.readLock().acquire();
+                //_rwl.readLock().acquire();
                 _rwl.writeLock().release();
                 fireConversationsChanged();
-                _rwl.readLock().release();
-            } catch (InterruptedException ie) {
-                _logger.severe("Interrupted! " + ie);
+                //_rwl.readLock().release();
             }
         }
         
@@ -271,15 +281,19 @@ public class FragmentsModel extends AbstractPluginModel {
                 if (_type.equals(type) && _key.equals(key)) {
                     int index = getIndexOfConversation(id);
                     if (index < 0) {
+                    	Boolean writeLocked = Boolean.FALSE;
                         try {
                             _rwl.writeLock().acquire();
-                            _conversationList.add(-index-1, id);
-                            _rwl.readLock().acquire();
-                            _rwl.writeLock().release();
-                            fireConversationAdded(id,  -index-1);
-                            _rwl.readLock().release();
+                            writeLocked = Boolean.TRUE;
                         } catch (InterruptedException ie) {
                             _logger.severe("Interrupted! " + ie);
+                        }
+                        if (writeLocked) {
+                            _conversationList.add(-index-1, id);
+                            //_rwl.readLock().acquire();
+                            _rwl.writeLock().release();
+                            fireConversationAdded(id,  -index-1);
+                            //_rwl.readLock().release();
                         }
                     }
                 }
@@ -287,17 +301,21 @@ public class FragmentsModel extends AbstractPluginModel {
         }
         
         public void fragmentsChanged() {
+        	Boolean writeLocked = Boolean.FALSE;
             try {
                 _rwl.writeLock().acquire();
+                writeLocked = Boolean.TRUE;
+            } catch (InterruptedException ie) {
+                _logger.severe("Interrupted! " + ie);
+            }
+            if(writeLocked) {
                 _key = null;
                 _type = null;
                 _conversationList.clear();
-                _rwl.readLock().acquire();
+                //_rwl.readLock().acquire();
                 _rwl.writeLock().release();
                 fireConversationsChanged();
-                _rwl.readLock().release();
-            } catch (InterruptedException ie) {
-                _logger.severe("Interrupted! " + ie);
+                //_rwl.readLock().release();
             }
         }
         

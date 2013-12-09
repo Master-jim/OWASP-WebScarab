@@ -218,7 +218,9 @@ public class ConversationTableModel extends ExtensibleTableModel<ConversationID>
 	}
 
 	public void setValueAt(Object value, int row, int column) {
-        if (column == 0) return;
+        if (column == 0|| getRowCount() < row || getColumnCount() < column-1 || null == value) {
+        	return;
+        }
 		super.setValueAt(value, row, column-1);
 	}
 

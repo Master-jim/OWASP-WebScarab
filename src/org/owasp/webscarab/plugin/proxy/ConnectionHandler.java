@@ -252,7 +252,6 @@ public class ConnectionHandler implements Runnable {
 						_logger
 								.severe("IOException retrieving the response for "
 										+ request.getURL() + " : " + ioe);
-						ioe.printStackTrace();
 						response = errorResponse(request, ioe);
 						// prevent the conversation from being
 						// submitted/recorded
