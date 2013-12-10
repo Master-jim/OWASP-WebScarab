@@ -218,12 +218,10 @@ public class ConversationTableModel extends ExtensibleTableModel<ConversationID>
 	}
 
 	public void setValueAt(Object value, int row, int column) {
-		// 2011-12-23 - JLS - Handling out of range values - BEGIN
-		if (column == 0 || getRowCount() < row || getColumnCount() < column-1 || value == null) {
-			return;
-		}
+        if (column == 0|| getRowCount() < row || getColumnCount() < column-1 || null == value) {
+        	return;
+        }
 		super.setValueAt(value, row, column-1);
-		// 2011-12-23 - JLS - Handling out of range values - END
 	}
 
 	protected void addedConversation(ConversationEvent evt) {
