@@ -714,6 +714,10 @@ public class FrameworkModel {
      * @return an array of cookies, or a zero length array if there are none applicable.
      */
     public Cookie[] getCookiesForUrl(HttpUrl url) {
+    	// TODO: better implement cases handled: null value, no cookies, cookies. With try/catch for only methods which need it and only one return 
+    	if (null == url) {
+    		return NO_COOKIES;
+    	}
         try {
             _rwl.readLock().acquire();
             try {
