@@ -826,7 +826,7 @@ public class UIFramework extends JFrame implements WebScarabUI {
                     "See http://www.owasp.org/software/webscarab.html",
                     "", "Primary Developer : ",
                     "         Rogan Dawes (rogan at dawes.za.net)",
-                    "This version is modified by Martin Holst Swende"
+                    "This version is modified by Martin Holst Swende and Jérémy Lebourdais"
         };
         JOptionPane.showMessageDialog(this, message, "About WebScarab", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_aboutMenuItemActionPerformed
