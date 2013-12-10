@@ -47,6 +47,7 @@ import org.owasp.webscarab.plugin.openid.OpenIdProxy;
 import org.owasp.webscarab.plugin.openid.swing.OpenIdPanel;
 import org.owasp.webscarab.plugin.proxy.BeanShell;
 import org.owasp.webscarab.plugin.proxy.BrowserCache;
+import org.owasp.webscarab.plugin.proxy.BrowserDisableGZIP;
 import org.owasp.webscarab.plugin.proxy.CookieTracker;
 import org.owasp.webscarab.plugin.proxy.ListenerSpec;
 import org.owasp.webscarab.plugin.proxy.ManualEdit;
@@ -215,6 +216,11 @@ public class WebScarab {
         OpenIdProxy openIdProxy = new OpenIdProxy();
         proxy.addPlugin(openIdProxy);
         
+        // JLS- 2010-07-20 Adding GZIP disable - BEGIN
+        BrowserDisableGZIP bdg = new BrowserDisableGZIP();
+        proxy.addPlugin(bdg);
+        // JLS- 2010-07-20 Adding GZIP disable - END
+
         ManualRequest manualRequest = new ManualRequest(framework);
         framework.addPlugin(manualRequest);
         uif.addPlugin(new ManualRequestPanel(manualRequest));
