@@ -252,6 +252,8 @@ public class TableSorter extends AbstractTableModel {
         Row[] rows = getViewToModel();
         if (viewIndex >= rows.length) {
             System.err.println("TableSorter: Index row count is " + rows.length + ", looking for item " + viewIndex);
+         // JLS - 2010-07-22 Modifying default behaviour
+            return -1;
         }
         return rows[viewIndex].modelIndex;
     }
@@ -288,22 +290,42 @@ public class TableSorter extends AbstractTableModel {
     public boolean isCellEditable(int row, int column) {
         if (!isSorting()) {
             return tableModel.isCellEditable(row, column);
+         // 2011-12-23 - JLS - Handling out of range values - BEGIN
+        } else {
+        	int viewRow = modelIndex(row);
+        	if ( viewRow > -1) {
+        		return tableModel.isCellEditable(modelIndex(row), column);
+        	}
         }
-        return tableModel.isCellEditable(modelIndex(row), column);
+        return(false);
+        // 2011-12-23 - JLS - Handling out of range values - END
     }
 
     public Object getValueAt(int row, int column) {
         if (!isSorting()) {
             return tableModel.getValueAt(row, column);
+         // 2011-12-23 - JLS - Handling out of range values - BEGIN
+        } else {
+        	int viewRow = modelIndex(row);
+        	if ( viewRow > -1) {
+        		return tableModel.getValueAt(modelIndex(row), column);
+        	}
         }
-        return tableModel.getValueAt(modelIndex(row), column);
+        return(null);
+        // 2011-12-23 - JLS - Handling out of range values - END
     }
 
     public void setValueAt(Object aValue, int row, int column) {
         if (!isSorting()) {
             tableModel.setValueAt(aValue, row, column);
+         // 2011-12-23 - JLS - Handling out of range values - BEGIN
+        } else {
+        	int viewRow = modelIndex(row);
+        	if ( viewRow > -1) {
+        		tableModel.setValueAt(aValue, modelIndex(row), column);
+        	}
         }
-        tableModel.setValueAt(aValue, modelIndex(row), column);
+        // 2011-12-23 - JLS - Handling out of range values - END
     }
 
     // Helper classes
