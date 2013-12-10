@@ -14,9 +14,11 @@ import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -178,6 +180,15 @@ public class WebScarab {
             ch.setLevel(Level.FINE);
             logger.warning("Unrecognized console log level " + consoleLogLevel);
         }
+        // 2013-03-07 - JLS - Adding log to file in append mode - BEGIN
+        try {
+                Handler fileLogHandler = new FileHandler("webscarab.log", true);
+                fileLogHandler.setFormatter(new SimpleFormatter());
+                logger.addHandler(fileLogHandler);
+        } catch (IOException ioe) {
+                System.err.println("Error writing log file: " + ioe);
+        }
+        // 2013-03-07 - JLS - Adding log to file in append mode - END
     }
     
     public static void loadAllPlugins(Framework framework, WebScarabUI uif) {
