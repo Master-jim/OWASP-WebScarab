@@ -205,6 +205,9 @@ public class UIFramework extends JFrame implements WebScarabUI {
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         
         String level = Preferences.getPreference("UI.logLevel","INFO");
+        _logger.setLevel(Level.parse(level));
+        _dh.setLevel(Level.parse(level));
+        _logger.finest("Log level detected: "+level);
         if (level.equals("SEVERE")) {
             severeLogRadioButtonMenuItem.setSelected(true);
         } else if (level.equals("INFO")) {
@@ -812,14 +815,19 @@ public class UIFramework extends JFrame implements WebScarabUI {
         String cmd = evt.getActionCommand().toUpperCase();
         if (cmd.equals("SEVERE")) {
             _dh.setLevel(Level.SEVERE);
+            _logger.setLevel(Level.SEVERE);
         } else if (cmd.equals("INFO")) {
             _dh.setLevel(Level.INFO);
+            _logger.setLevel(Level.INFO);
         } else if (cmd.equals("FINE")) {
             _dh.setLevel(Level.FINE);
+            _logger.setLevel(Level.FINE);
         } else if (cmd.equals("FINER")) {
             _dh.setLevel(Level.FINER);
+            _logger.setLevel(Level.FINER);
         } else if (cmd.equals("FINEST")) {
             _dh.setLevel(Level.FINEST);
+            _logger.setLevel(Level.FINEST);
         } else {
             System.err.println("Unknown log level: '" + cmd + "'");
             return;
@@ -859,7 +867,7 @@ public class UIFramework extends JFrame implements WebScarabUI {
                     "See http://www.owasp.org/software/webscarab.html",
                     "", "Primary Developer : ",
                     "         Rogan Dawes (rogan at dawes.za.net)",
-                    "This version is modified by Martin Holst Swende"
+                    "This version is modified by Martin Holst Swende and Jérémy Lebourdais"
         };
         JOptionPane.showMessageDialog(this, message, "About WebScarab", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_aboutMenuItemActionPerformed

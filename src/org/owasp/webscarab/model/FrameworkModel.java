@@ -816,7 +816,7 @@ public class FrameworkModel {
      */
     public Cookie[] getCookiesForUrl(HttpUrl url) {
     	Cookie[] cookiesReturned = NO_COOKIES;
-    	if (null != _store) {
+    	if (null != _store && null != url) {
     		try {
     			readLock();
     			List<Cookie> cookies = new ArrayList<Cookie>();
