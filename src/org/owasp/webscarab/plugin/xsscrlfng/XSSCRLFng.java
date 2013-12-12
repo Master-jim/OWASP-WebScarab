@@ -1107,11 +1107,11 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 	
 	public int diffResponses(Response originalResponse, Response newResponse) {
 		if (originalResponse == null || newResponse == null) {
-			_logger.info("ERROR: null parameters, leaving.");
+			_logger.warning("ERROR: null parameters, leaving.");
 			return -1;
 		}
 		diff_match_patch dmp = new diff_match_patch();
-		//_logger.fine("Computing differences between: "+originalResponse.getConversationID () + " and " + newResponse.getConversationID ());
+		_logger.finer("Computing differences between: "+originalResponse.getConversationID () + " and " + newResponse.getConversationID ());
 		Response resp_orig = new Response(originalResponse);
 		resp_orig.deleteHeader("Date");
 		resp_orig.deleteHeader("Set-Cookie");
@@ -1167,13 +1167,13 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 			}
 		}
 		int levenshtein = dmp.diff_levenshtein(diffs);
-		_logger.fine("Levensthein: "+ levenshtein);
+		_logger.finer("Levensthein: "+ levenshtein);
 		// Test with content length correlation
 		int lengthFactor = java.lang.Math.abs(newResponse.getContent().length - originalResponse.getContent().length);
-		_logger.fine("lengthFactor is: "+ lengthFactor);
+		_logger.finer("lengthFactor is: "+ lengthFactor);
 		if (lengthFactor < 10) {
 			levenshtein = Math.round(levenshtein /2);
-			_logger.fine("levenshtein is now: "+ levenshtein);
+			_logger.finer("levenshtein is now: "+ levenshtein);
 		}
 		//int correlatedLevenshtein = levenshtein * (
 		return(levenshtein);
@@ -1240,7 +1240,7 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 			_logger.severe("Invalid parameters: response, reAnalyse or fromPlugin is NULL. Leaving");
 			return;
 		}
-		_logger.fine("checkForSQLiInResponse: reAnalyse: " + reAnalyse + " fromPlugin: " + fromPlugin);
+		_logger.finer("checkForSQLiInResponse: reAnalyse: " + reAnalyse + " fromPlugin: " + fromPlugin);
 		
 		// 2011-01-25 - JLS - Modifying the search to include the headers - BEGIN 
 		//NamedValue [] headers = response.getHeaders();
@@ -1320,8 +1320,8 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 					parameterTestedToLog = parameterTested;
 				}
 			
-				_logger.fine("parameterTested from header : "+parameterTested);
-				_logger.fine("parameterTested from HashMap: "+specificParameters.get(_headerParameterTested));
+				_logger.finer("parameterTested from header : "+parameterTested);
+				_logger.finer("parameterTested from HashMap: "+specificParameters.get(_headerParameterTested));
 				parameterTested = specificParameters.get(_headerParameterTested);
 				
 				typeOfTest = specificParameters.get(headerTypeOfTest);
@@ -1502,6 +1502,7 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 								if (lowRisk) {
 									lowRisk = Boolean.FALSE;
 									notErrorBased = Boolean.TRUE;
+									_logger.fine("Unsetting lowRisk");
 								}
 							} else {
 								_logger.fine("Parameter: "+parameterTested +" Requetes (0) et (6): score HAUT => invalide la SQLi");
@@ -1519,6 +1520,7 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 								if (lowRisk) {
 									lowRisk = Boolean.FALSE;
 									notErrorBased = Boolean.TRUE;
+									_logger.fine("Unsetting lowRisk");
 								}
 							} else {
 								_logger.fine("Parameter: "+parameterTested +" Requetes (0) et (9): score HAUT => invalide la SQLi");
@@ -1545,6 +1547,7 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 								// If diff with (8) is also big, no more a low risk
 								if (diffs[8] > 30) {
 									lowRisk = Boolean.FALSE;
+									_logger.fine("Unsetting lowRisk");
 								}
 							}
 							// No error message when invalid request but different result when "OR FALSE" and "OR TRUE OR FALSE"
@@ -1561,6 +1564,7 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 								} else {
 									numberOfConfirmationHits = numberOfConfirmationHits -2;
 									lowRisk = Boolean.TRUE;
+									_logger.fine("Setting lowRisk");
 								}
 							}
 							// 2011-12-28 - JLS - Tweaking SQLi search in case of SQLi Num and no error when invalid request - END
@@ -1605,7 +1609,7 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 				}
 			}
 		}
-		_logger.fine("checkForSQLiInResponse: finished analyse.");
+		_logger.finer("checkForSQLiInResponse: finished analyse.");
 	}
 	
 	
@@ -1793,7 +1797,7 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 		Boolean injectionInElementEscapableFound = Boolean.FALSE;
 		Boolean injectionInElementColon = Boolean.FALSE;
 		int injectionCapability = 0;
-		String logSuffix = "ID: " + id + " ";
+		String logPrefix = "ID: " + id + " ";
 		Vector<String> patternsFoundKO = new Vector<String>(); 
 		// Response might be valid to be analyzed
 		String newResponseContent = body;
@@ -1819,7 +1823,7 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 			String nodeName = currentElement.nodeName();
 			if (nodeName != null && nodeName.equalsIgnoreCase(patternHtmlTag)) {
 				injectionAsNewElementFound = Boolean.TRUE;
-				_logger.info(logSuffix + "Found Injection as HTML TAG <"+nodeName+">, seen as a valid Tag by Jsoup. Try directly <script>.");
+				_logger.info(logPrefix + "Found Injection as HTML TAG <"+nodeName+">, seen as a valid Tag by Jsoup. Try directly <script>.");
 				//_logger.info(logSuffix + "-> Try directly <script>.");
 				injectionToLog.append("<");
 				injectionToLog.append(nodeName);
@@ -1838,11 +1842,11 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 					} else { 
 						currentChildString = childs.get(i).toString();
 					}
-					_logger.finer(logSuffix + "CurrentChildString: "+currentChildString);
+					_logger.finer(logPrefix + "CurrentChildString: "+currentChildString);
 					matcherOfInjectionInResponse = patternOfInjectionInResponseText.matcher(currentChildString);
 					// If current child (string representation) contains the pattern
 					if (matcherOfInjectionInResponse.matches()) {
-						_logger.finer(logSuffix + "CurrentChildString MATCHES pattern.");
+						_logger.finer(logPrefix + "CurrentChildString MATCHES pattern.");
 						// Found an injection in the text of an Element (e.g <h1>Injection string</h1>)
 						injectionInTextOfElementFound = Boolean.TRUE;
 						
@@ -1855,7 +1859,7 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 						Node nextSibling = childs.get(i).nextSibling();
 						if (nextSibling != null && childs.get(i).nextSibling().nodeName().equalsIgnoreCase(patternHtmlTag)) {
 							injectionFound = currentChildString + childs.get(i).nextSibling().toString().replaceAll("(?s)\\r","").replaceAll("(?s)\\n","").replaceAll("(?s)</"+childs.get(i).nextSibling().nodeName()+">$","");
-							_logger.fine(logSuffix + "Found correspond injected tag: "+injectionFound);
+							_logger.fine(logPrefix + "Found correspond injected tag: "+injectionFound);
 						} else {
 							// Check if an HTML tag (e.g <script>) can be created
 							injectionFound = matcherOfInjectionInResponse.group(1);
@@ -1870,20 +1874,20 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 							injectionNewTagInElementTextFound = Boolean.TRUE;
 							injectionToLog.append(injectionFound);
 							injectionToLog.append('|');
-							_logger.info(logSuffix + "Found Injection in TEXT of Element: "+emptyElement.toString() + ". Try directly: <script>");
+							_logger.info(logPrefix + "Found Injection in TEXT of Element: "+emptyElement.toString() + ". Try directly: <script>");
 							//_logger.info(logSuffix + "-> Text found: " + injectionFound.trim());
 							//_logger.info(logSuffix + "-> Try directly: <script>");
 						} else {
 							if ((injectionCharsFound.replaceAll(String.valueOf(charToRepeat),"").length()) > 0) {
-								_logger.fine(logSuffix + "Found pattern in TEXT of Element: "+emptyElement.toString());
-								_logger.fine(logSuffix + "-> Text found: " + injectionFound);
-								_logger.fine(logSuffix + "-> Creation of a new TAG does NOT seem possible.");
-								_logger.fine(logSuffix + "-> Permitted chars are: "+injectionCharsFound);
+								_logger.fine(logPrefix + "Found pattern in TEXT of Element: "+emptyElement.toString());
+								_logger.fine(logPrefix + "-> Text found: " + injectionFound);
+								_logger.fine(logPrefix + "-> Creation of a new TAG does NOT seem possible.");
+								_logger.fine(logPrefix + "-> Permitted chars are: "+injectionCharsFound);
 								// 2013-07-04 - JLS - Test if injection is within a script - BEGIN
 								if (emptyElement.toString().toUpperCase().indexOf("SCRIPT")>=0) {
-									_logger.info(logSuffix + "Found pattern in TEXT of a script: "+emptyElement.toString());
-									_logger.info(logSuffix + "-> Text found: " + injectionFound);
-									_logger.info(logSuffix + "-> Permitted chars are: "+injectionCharsFound);
+									_logger.info(logPrefix + "Found pattern in TEXT of a script: "+emptyElement.toString());
+									_logger.info(logPrefix + "-> Text found: " + injectionFound);
+									_logger.info(logPrefix + "-> Permitted chars are: "+injectionCharsFound);
 									injectionInElementFound = Boolean.TRUE;
 									injectionToLog.append(injectionFound);
 									injectionToLog.append('|');
@@ -1894,14 +1898,14 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 					}
 				} else {
 				String currentChildString = childs.get(i).toString();
-				_logger.finer(logSuffix + "CurrentChildString is NORMAL element: "+currentChildString);
+				_logger.finer(logPrefix + "CurrentChildString is NORMAL element: "+currentChildString);
 				//_logger.finer("Matches? "+ currentChildString.matches("(?si).*(EDW-[0-9]+[^_]*_EDW|EDW-[0-9]+[^_]{1,60}).*"));
 				}
 
 			}
 			// Analysis of the childs of the current Node is done, so analysis is performed only on the current Element
 			currentElement.empty();
-			_logger.fine(logSuffix + "Analyzing currentElement: "+currentElement.toString());
+			_logger.finest(logPrefix + "Analyzing currentElement: "+currentElement.toString());
 			matcherOfInjectionInResponse = patternOfInjectionInResponse.matcher(currentElement.toString());
 			// Pattern is present in the HTML element (in tag name, attribute name or an attribute value)
 			if (matcherOfInjectionInResponse.matches()) {
@@ -1910,24 +1914,24 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 				injectionCharsFound = getCharsInjected(injectionFound.substring(1));
 				// If first character is also present in injected String, the injection can modify the Element itself
 				if (checkPossibleEscape(injectionFound, injectionFound.charAt(0))) {
-					_logger.info(logSuffix + "Found EDW in Element: " + currentElement);
-					_logger.info(logSuffix + "-> Text found: " + injectionFound);
+					_logger.info(logPrefix + "Found EDW in Element: " + currentElement);
+					_logger.info(logPrefix + "-> Text found: " + injectionFound);
 					
 					if (injectionCharsFound.indexOf('>') >=0 && injectionCharsFound.indexOf('<') >=0)
 					{
 						injectionInElementEscapableFound = Boolean.TRUE;
 						injectionToLog.append(injectionFound);
 						injectionToLog.append("|");
-						_logger.info(logSuffix + "-> Escape and new TAG is POSSIBLE.");
+						_logger.info(logPrefix + "-> Escape and new TAG is POSSIBLE.");
 					} else {
-						_logger.info(logSuffix + "-> Escape is possible but NOT the creation of a new TAG.");
+						_logger.info(logPrefix + "-> Escape is possible but NOT the creation of a new TAG.");
 					}
 				} else {
-					_logger.fine(logSuffix + "Found EDW in Element but it is NOT escapable");
-					_logger.fine(logSuffix + "Pattern found is: " + matcherOfInjectionInResponse.group(1));
+					_logger.fine(logPrefix + "Found EDW in Element but it is NOT escapable");
+					_logger.fine(logPrefix + "Pattern found is: " + matcherOfInjectionInResponse.group(1));
 					patternsFoundKO.add(matcherOfInjectionInResponse.group(1).substring(1));
 					if (injectionCharsFound.indexOf(':') >= 0) {
-						_logger.info(logSuffix + "Character ':' is permitted, maybe try javascript:alert('XSS') ???");
+						_logger.info(logPrefix + "Character ':' is permitted, maybe try javascript:alert('XSS') ???");
 						injectionInElementColon = Boolean.TRUE;
 					}
 				}
@@ -1938,7 +1942,7 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 		matcherOfInjectionInResponse = patternOfInjectionInResponseText.matcher(newResponseContent);
 		if (matcherOfInjectionInResponse.matches()) {
 				injectionFound = matcherOfInjectionInResponse.group(2);
-				_logger.info(logSuffix + "Found EDW in raw text, VERIFYING if declared as simple text by jsoup.");
+				_logger.fine(logPrefix + "Found EDW in raw text, VERIFYING if declared as simple text by jsoup.");
 				Boolean found = Boolean.FALSE;
 				for (int i=0; i < patternsFoundKO.size(); i++) {
 					if (injectionFound.equals(patternsFoundKO.get(i))) {
@@ -1949,8 +1953,8 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 					// Test for potential injection
 					String caractersFound = checkInjectabilityOfString(injectionFound, injectionInElementEscapableFound);
 					if (!caractersFound.isEmpty()) {
-						_logger.info(logSuffix + "Found Injection in RAW TEXT, these caracters are injectable: " + caractersFound);
-						_logger.info(logSuffix + "-> Context is: " + matcherOfInjectionInResponse.group(1) + matcherOfInjectionInResponse.group(2) + matcherOfInjectionInResponse.group(3));
+						_logger.info(logPrefix + "Found Injection in RAW TEXT, these caracters are injectable: " + caractersFound);
+						_logger.info(logPrefix + "-> Context is: " + matcherOfInjectionInResponse.group(1) + matcherOfInjectionInResponse.group(2) + matcherOfInjectionInResponse.group(3));
 						injectionToLog.append(injectionFound);
 						injectionToLog.append("|");
 					}
@@ -1983,7 +1987,7 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 		
 		if (xssFound) {
 			if (injectionCapability >5) {
-				_logger.info(logSuffix + "-> Injection capability of Request " + id + " is : "+injectionCapability);
+				_logger.info(logPrefix + "-> Injection capability of Request " + id + " is : "+injectionCapability);
 				injectionToLog.insert(0,new String (injectionCapability+":"));
 				setXSSinResponse (injectionToLog.toString(), id, response, "body", parameterTested, false);
 			} else if (injectionCapability <5 && injectionCapability >0) {
