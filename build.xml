@@ -81,13 +81,13 @@
             deprecation="yes"
             destdir="${build.dir}"
             excludes="**/test/**"
-            listfiles="no"
+            listfiles="yes"
             optimize="on"
             srcdir="${src.dir}"
             debug="on"
-            source="1.6"
-            target="1.6"
-            includeantruntime="false"
+            source="1.7"
+            target="1.7"
+            includeantruntime="yes"
         >
         </javac>
     </target>
