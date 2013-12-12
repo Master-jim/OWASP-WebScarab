@@ -87,6 +87,9 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 	private boolean _doSQLiTests = false ;
 	// 2011-07-26 - JLS - Adding a button for SQLi tests - END
 	
+	// 2013-12-11 - JLS - Perform encoding on demand
+	private Boolean _performEncoding = Boolean.FALSE;
+	
 	//private int uniqueId = 0;
 	private AtomicInteger uniqueId = null;
 	
@@ -546,6 +549,8 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 					}
 
 
+					// 2013-12-11 - JLS - Perform encoding on demand
+					if (_performEncoding) {
 					// Create the URL objects
 					try {
 						// Set new URL
@@ -567,6 +572,7 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 						// Logger level fine as it is normal to have errors during the creation of some invalid URLs
 						_logger.fine("Error during the URL creation of: "+exception);
 						
+					}
 					}
 					
 					
@@ -741,17 +747,27 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 							}
 							
 							synchronized(specificParametersOfRequests) {
-								specificParametersOfRequests.put(newRequest,newParametersOfRequest);
+								// 2013-12-11 - JLS - Perform encoding on demand
+								if (_performEncoding) {
+									specificParametersOfRequests.put(newRequest,newParametersOfRequest);
+								}
 								specificParametersOfRequests.put(newRequestNoEncoding,newParametersOfRequest);
 							}
 							
-							newRequest.addHeader(_headerParameterTested, "POST/"+currentParam+"("+newTokenType+")");
-							newRequest.addHeader(headerOriginalRequestId, id.toString());
+							// 2013-12-11 - JLS - Perform encoding on demand
+							if (_performEncoding) {
+								newRequest.addHeader(_headerParameterTested, "POST/"+currentParam+"("+newTokenType+")");
+								newRequest.addHeader(headerOriginalRequestId, id.toString());
+							}
+							
 							newRequestNoEncoding.addHeader(_headerParameterTested, "POST/"+currentParam+"("+newTokenType+")");
 							newRequestNoEncoding.addHeader(headerOriginalRequestId, id.toString());
 							
 							
-							_model.enqueueRequest(newRequest, currentParam, testString);
+							// 2013-12-11 - JLS - Perform encoding on demand
+							if (_performEncoding) {
+								_model.enqueueRequest(newRequest, currentParam, testString);
+							}
 							_model.enqueueRequest(newRequestNoEncoding, currentParam, testStringNoEncoding);
 							
 							// Envoi de la requête modifiée
@@ -2183,6 +2199,16 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 	}
 
 	// 2011-07-26 - JLS - Adding a button for SQLi tests - END
+	
+	// 2013-12-11 - JLS - Perform encoding on demand
+	public boolean doEncoding() {
+		return (_performEncoding);
+	}
+	public boolean switchEncodingTests () {
+ 		_performEncoding = !_performEncoding;
+ 		_logger.fine("Button Encoding clicked. Activation is now: "+_performEncoding);
+ 		return (_performEncoding);
+	}
 	
 	private String getParametersWithTestString(String content, String name, String value) {
 		StringBuffer buf = new StringBuffer("");
