@@ -494,9 +494,11 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 				// TODO: put the following in generateNewTestTokensTable
 				if (_doSQLiTests) {
 					newTokens.addAll(generateNewTextSQLiAllTokens(currentParamValue));
-					newTokens.addAll(generateNewTextSQLiAllTokensWithoutSQLWords(currentParamValue));
+					// TODO: Implement a option for evasion
+					//newTokens.addAll(generateNewTextSQLiAllTokensWithoutSQLWords(currentParamValue));
 					newTokens.addAll(generateNewNumericSQLiAllTokens(currentParamValue));
-					newTokens.addAll(generateNewNumericSQLiAllTokensWithoutSQLWords(currentParamValue));
+					// TODO: Implement a option for evasion
+					//newTokens.addAll(generateNewNumericSQLiAllTokensWithoutSQLWords(currentParamValue));
 				}
 				// 2011-07-26 - JLS - Adding a button for SQLi tests - END
 				String[] newToken = null;
@@ -685,9 +687,11 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 						// 2011-07-26 - JLS - Adding a button for SQLi tests - BEGIN
 						if (_doSQLiTests) {
 							newTokens.addAll(generateNewTextSQLiAllTokens(currentParamValue));
-							newTokens.addAll(generateNewTextSQLiAllTokensWithoutSQLWords(currentParamValue));
+							// TODO: Implement a option for evasion
+							//newTokens.addAll(generateNewTextSQLiAllTokensWithoutSQLWords(currentParamValue));
 							newTokens.addAll(generateNewNumericSQLiAllTokens(currentParamValue));
-							newTokens.addAll(generateNewNumericSQLiAllTokensWithoutSQLWords(currentParamValue));
+							// TODO: Implement a option for evasion
+							//newTokens.addAll(generateNewNumericSQLiAllTokensWithoutSQLWords(currentParamValue));
 						}
 						// 2011-07-26 - JLS - Adding a button for SQLi tests - END
 						
