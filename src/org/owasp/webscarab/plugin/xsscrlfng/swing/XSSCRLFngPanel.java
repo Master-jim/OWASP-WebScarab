@@ -259,6 +259,9 @@ public class XSSCRLFngPanel extends javax.swing.JPanel implements SwingPluginUI 
 	 	activateSQLiTestsButton = new javax.swing.JButton();
 	 	// 2011-07-26 - JLS - Adding a button for SQLi tests - BEGIN
 	 	
+	 	// 2013-12-11 - JLS - Perform encoding on demand
+	 	activateEncodingButton = new javax.swing.JButton();
+	 	
 		// 2011-03-14 - JLS - Adding a text area for the XSS search functions - BEGIN
 		patternCompleteTextArea = new javax.swing.JTextArea();
 		patternCompletejScrollPane = new javax.swing.JScrollPane();
@@ -428,6 +431,21 @@ public class XSSCRLFngPanel extends javax.swing.JPanel implements SwingPluginUI 
 		
 		controlPanel.add(activateSQLiTestsButton, new java.awt.GridBagConstraints());
 		// 2011-07-26 - JLS - Adding a button for SQLi tests - END
+		
+		// 2013-12-11 - JLS - Perform encoding on demand
+		if (! _xsscrlf.doEncoding()) {
+			activateEncodingButton.setText("Activate Encoding");
+		} else {
+			activateEncodingButton.setText("Deactivate Encoding");
+		}
+		activateEncodingButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				activateEncodingButtonActionPerformed(evt);
+			}
+		});
+		controlPanel.add(activateEncodingButton, new java.awt.GridBagConstraints());
+		
+		
 
 		// 2011-03-14 - JLS - Adding a reAnalyse All button - BEGIN
 		reAnalyseButton = new javax.swing.JButton();
@@ -598,6 +616,27 @@ public class XSSCRLFngPanel extends javax.swing.JPanel implements SwingPluginUI 
 	}
 	// 2011-07-26 - JLS - Adding a button for SQLi tests - END
 	
+	private void activateEncodingButtonActionPerformed(java.awt.event.ActionEvent evt) {
+		new SwingWorker() {
+			public Object construct() {                
+				;
+				if (! _xsscrlf.switchEncodingTests()) {
+					activateEncodingButton.setText("Activate Encoding");
+				} else {
+					activateEncodingButton.setText("Deactivate Encoding");
+				}
+				return null;
+				
+			}
+			public void finished() {
+				Object result = getValue();
+				if (result != null && result instanceof Throwable) {
+					Throwable throwable = (Throwable) result;
+					_logger.warning("Caught a : " + throwable.toString());
+				}
+			}
+		}.start();
+	}
 	
 	
 	// 2011-03-14 - JLS - Adding a reAnalyse All button - BEGIN
@@ -744,6 +783,9 @@ public class XSSCRLFngPanel extends javax.swing.JPanel implements SwingPluginUI 
 	// 2011-07-26 - JLS - Adding a button for SQLi tests - BEGIN
 	private javax.swing.JButton activateSQLiTestsButton = null;
 	// 2011-07-26 - JLS - Adding a button for SQLi tests - BEGIN
+	
+	// 2013-12-11 - JLS - Perform encoding on demand
+	private javax.swing.JButton activateEncodingButton = null;
 	
 	// 2011-03-14 - JLS - Adding a reAnalyse All button - BEGIN
 	private javax.swing.JButton reAnalyseButton;
