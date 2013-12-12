@@ -371,7 +371,6 @@ public class SummaryPanel extends JPanel {
 
 				}));
 		conversationTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-		conversationTable.setCellSelectionEnabled(true);
 		conversationScrollPane.setViewportView(conversationTable);
 
 		summarySplitPane.setRightComponent(conversationScrollPane);
