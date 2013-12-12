@@ -1111,7 +1111,7 @@ public class XSSCRLFng implements Plugin, ConversationHandler {
 			return -1;
 		}
 		diff_match_patch dmp = new diff_match_patch();
-		_logger.finer("Computing differences between: "+originalResponse.getConversationID () + " and " + newResponse.getConversationID ());
+		//_logger.finer("Computing differences between: "+originalResponse.getConversationID () + " and " + newResponse.getConversationID ());
 		Response resp_orig = new Response(originalResponse);
 		resp_orig.deleteHeader("Date");
 		resp_orig.deleteHeader("Set-Cookie");
